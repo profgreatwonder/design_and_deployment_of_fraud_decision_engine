@@ -1,0 +1,23 @@
+bin/
+cmake/
+conda-meta/
+etc/
+include/
+lib/
+man/
+share/
+ssl/
+var/
+
+# System files
+.DS_Store
+*.swp
+*.swo
+
+# Conda environment
+/env
+/venv
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
