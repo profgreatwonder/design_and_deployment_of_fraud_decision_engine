@@ -8,4 +8,4 @@ export MINIO_ROOT_PASSWORD="fraudshielded_password"
 export MINIO_BUCKET="mlflow"
 
 # Run setup
-python setup-minio.py
+python design_and_deployment_of_fraud_decision_engine/experiment_tracking_configs/setup-minio.py

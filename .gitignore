@@ -8,6 +8,7 @@ man/
 share/
 ssl/
 var/
+sbin/
 
 # System files
 .DS_Store
@@ -21,4 +22,10 @@ var/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 .env
+.venv/
+*.log
+
+
+

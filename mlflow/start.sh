@@ -7,7 +7,7 @@ echo "Backend store: MongoDB"
 echo "Artifact store: MinIO (S3-compatible)"
 
 # Validate required environment variables
-if [ -z "$MONGODB_URI" ]; then
+if [ -z "$POSTGRES_URL" ]; then
     echo "ERROR: MONGODB_URI is not set"
     exit 1
 fi
@@ -22,7 +22,7 @@ sleep 3
 
 # Start MLflow server
 exec mlflow server \
-    --backend-store-uri "${MONGODB_URI}" \
+    --backend-store-uri "${POSTGRES_URL}" \
     --default-artifact-root "s3://${MINIO_BUCKET}/mlflow-artifacts" \
     --host 0.0.0.0 \
     --port 5000 \

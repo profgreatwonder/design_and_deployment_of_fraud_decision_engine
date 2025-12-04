@@ -10,5 +10,5 @@ RUN chmod +x /start.sh
 # Expose MinIO API port (Render will map this)
 EXPOSE 9000
 
-# Run the startup script
-CMD ["/start.sh"]
+# Run the startup script with shell
+ENTRYPOINT ["/bin/sh", "/start.sh"]
