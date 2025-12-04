@@ -41,19 +41,19 @@ echo "Backend store: PostgreSQL"
 echo "Artifact store: MinIO (S3-compatible)"
 
 # Validate required environment variables
-if [ -z "$POSTGRES_URL" ]; then
-    echo "ERROR: POSTGRES_URL is not set"
-    echo "Please set PostgreSQL connection string"
-    exit 1
-fi
+# if [ -z "$POSTGRES_URL" ]; then
+#     echo "ERROR: POSTGRES_URL is not set"
+#     echo "Please set PostgreSQL connection string"
+#     exit 1
+# fi
 
-if [ -z "$MINIO_BUCKET" ]; then
-    echo "WARNING: MINIO_BUCKET not set, using default 'mlflow'"
-    export MINIO_BUCKET="mlflow"
-fi
+# if [ -z "$MINIO_BUCKET" ]; then
+#     echo "WARNING: MINIO_BUCKET not set, using default 'mlflow'"
+#     export MINIO_BUCKET="mlflow"
+# fi
 
 # Wait a moment for services to be ready
-sleep 3
+# sleep 3
 
 # Start MLflow server with reduced memory footprint
 exec mlflow server \
