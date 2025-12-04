@@ -49,6 +49,7 @@ dependencies:
   - contourpy=1.2.1
   - cryptography=45.0.6
   - cycler=0.11.0
+  - cyrus-sasl=2.1.28
   - databricks-sdk=0.63.0
   - dav1d=1.2.1
   - deprecated=1.2.18
@@ -99,6 +100,7 @@ dependencies:
   - joblib=1.5.1
   - jpeg=9e
   - kiwisolver=1.4.4
+  - krb5=1.21.3
   - lcms2=2.16
   - lerc=4.0.0
   - libabseil=20250127.0
@@ -110,6 +112,7 @@ dependencies:
   - libcurl=8.14.1
   - libcxx=19.1.7
   - libdeflate=1.22
+  - libedit=3.1.20250104
   - libev=4.33
   - libevent=2.1.12
   - libffi=3.4.4
@@ -118,9 +121,12 @@ dependencies:
   - libglib=2.84.2
   - libgrpc=1.71.0
   - libiconv=1.16
+  - libkrb5=1.21.3
   - libnghttp2=1.57.0
+  - libntlm=1.8
   - libopenblas=0.3.29
   - libpng=1.6.39
+  - libpq=17.4
   - libprotobuf=5.29.3
   - libre2-11=2024.07.02
   - libsodium=1.0.20
@@ -131,6 +137,7 @@ dependencies:
   - libwebp-base=1.3.2
   - libxml2=2.13.8
   - llvm-openmp=19.1.7
+  - lmdb=0.9.31
   - lz4-c=1.9.4
   - mako=1.3.10
   - markdown=3.8.2
@@ -149,6 +156,7 @@ dependencies:
   - numpy=2.0.2
   - numpy-base=2.0.2
   - openjpeg=2.5.2
+  - openldap=2.6.10
   - openssl=3.6.0
   - opentelemetry-api=1.36.0
   - opentelemetry-sdk=1.36.0
@@ -165,6 +173,8 @@ dependencies:
   - prometheus_flask_exporter=0.23.2
   - propcache=0.3.1
   - protobuf=5.29.3
+  - psycopg2=2.9.10
+  - psycopg2-binary=2.9.10
   - pyarrow=19.0.0
   - pyasn1=0.6.1
   - pyasn1-modules=0.4.2
@@ -174,7 +184,6 @@ dependencies:
   - pydantic=2.11.7
   - pydantic-core=2.33.2
   - pygments=2.19.2
-  - pymongo=4.13.2
   - pynacl=1.5.0
   - pyopenssl=25.1.0
   - pyparsing=3.2.0
