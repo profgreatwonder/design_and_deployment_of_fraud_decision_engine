@@ -64,5 +64,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# Run the startup script
-CMD ["./start.sh"]
+# Run the startup script with explicit shell
+CMD ["/bin/bash", "./start.sh"]
