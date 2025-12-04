@@ -32,13 +32,17 @@
 
 
 
-!/bin/bash
+# !/bin/bash
 
 set -e
 
 echo "Starting MLflow server..."
 echo "Backend store: PostgreSQL"
 echo "Artifact store: MinIO (S3-compatible)"
+
+# Fail fast if required vars missing
+[ -z "$POSTGRES_URL" ] && echo "POSTGRES_URL is required" && exit 1
+[ -z "$MINIO_BUCKET" ] && echo "MINIO_BUCKET is required" && exit 1
 
 # Validate required environment variables
 # if [ -z "$POSTGRES_URL" ]; then
