@@ -1,0 +1,257 @@
+# # # render.yaml
+# # services:
+# #   - type: web
+# #     name: mlflow-production
+# #     env: docker
+# #     dockerfilePath: ./Dockerfile
+# #     dockerContext: .
+# #     region: oregon  # or: frankfurt, singapore, ohio
+# #     plan: starter
+# #     numInstances: 1
+# #     autoDeploy: true
+# #     healthCheckPath: /
+# #     envVars:
+# #       - key: MLFLOW_BACKEND_STORE_URI
+# #         sync: false
+# #       - key: MLFLOW_ARTIFACT_STORE_URI
+# #         sync: false
+# #       - key: MLFLOW_HOST
+# #         value: 0.0.0.0
+# #       - key: MLFLOW_PORT
+# #         value: 5000
+# #       - key: MLFLOW_WORKERS
+# #         value: 4
+# #       - key: PYTHONUNBUFFERED
+# #         value: 1
+# #     domains:
+# #       - mlflow.yourdomain.com  # Optional custom domain
+
+
+
+
+
+
+
+# # render.yaml - COMPLETE RENDER SETUP
+# services:
+#   # ============================================
+#   # MLFLOW SERVER (Web Service)
+#   # ============================================
+#   - type: web
+#     name: mlflow-server
+#     env: docker
+#     dockerfilePath: ./Dockerfile
+#     dockerContext: .
+#     region: oregon  # Options: oregon, frankfurt, singapore, ohio
+#     plan: professional
+#     numInstances: 2
+#     autoDeploy: true
+    
+#     # Health check
+#     healthCheckPath: /health
+#     healthCheckTimeout: 10
+    
+#     # Auto-scaling
+#     # autoScaling:
+#     #   minInstances: 2
+#     #   maxInstances: 5
+#     #   targetCPUPercent: 70
+#     #   targetMemoryPercent: 70
+    
+#     # Environment Variables
+#     envVars:
+#       # MongoDB Configuration
+#       - key: MONGO_SERVICE_NAME
+#         value: mlflow-mongodb
+#       - key: MONGO_HOST
+#         value: mlflow-mongodb.internal
+#       - key: MONGO_PORT
+#         value: 27017
+#       - key: MONGO_USER
+#         value: mlflow
+#       - key: MONGO_PASSWORD
+#         generateValue: true
+#       - key: MONGO_DB
+#         value: mlflow
+      
+#       # MinIO Configuration
+#       - key: MINIO_SERVICE_NAME
+#         value: mlflow-minio
+#       - key: MINIO_HOST
+#         value: mlflow-minio.internal
+#       - key: MINIO_PORT
+#         value: 9000
+#       - key: MINIO_CONSOLE_PORT
+#         value: 9001
+#       - key: MINIO_ACCESS_KEY
+#         generateValue: true
+#       - key: MINIO_SECRET_KEY
+#         generateValue: true
+#       - key: MINIO_BUCKET
+#         value: mlflow-artifacts
+#       - key: MINIO_SECURE
+#         value: false
+#       - key: MINIO_REGION
+#         value: us-east-1
+      
+#       # MLflow Server Configuration
+#       - key: MLFLOW_HOST
+#         value: 0.0.0.0
+#       - key: MLFLOW_PORT
+#         value: 5000
+#       - key: MLFLOW_WORKERS
+#         value: 2
+#       - key: MLFLOW_TIMEOUT
+#         value: 120
+#       - key: MLFLOW_SERVE_ARTIFACTS
+#         value: true
+#       - key: MLFLOW_PROMETHEUS_ENABLED
+#         value: false
+      
+#       # Application Configuration
+#       - key: LOG_LEVEL
+#         value: INFO
+#       - key: DEBUG
+#         value: false
+#       - key: PYTHONUNBUFFERED
+#         value: 1
+#       - key: RENDER
+#         value: true
+      
+#       # AWS SDK for MinIO
+#       - key: AWS_ACCESS_KEY_ID
+#         fromService:
+#           name: mlflow-minio
+#           type: pserv
+#           property: envVar
+#           envVarKey: MINIO_ROOT_USER
+#       - key: AWS_SECRET_ACCESS_KEY
+#         fromService:
+#           name: mlflow-minio
+#           type: pserv
+#           property: envVar
+#           envVarKey: MINIO_ROOT_PASSWORD
+#       - key: AWS_DEFAULT_REGION
+#         value: us-east-1
+    
+#     # Disk for caching
+#     disk:
+#       name: mlflow-cache
+#       mountPath: /app/cache
+#       sizeGB: 10
+    
+#     # Custom domain (optional)
+#     domains:
+#       - mlflow.yourcompany.com
+    
+#     # Headers for security
+#     headers:
+#       - path: /*
+#         name: X-Frame-Options
+#         value: DENY
+#       - path: /*
+#         name: X-Content-Type-Options
+#         value: nosniff
+#       - path: /*
+#         name: X-XSS-Protection
+#         value: 1; mode=block
+
+#   # ============================================
+#   # MONGODB (Private Service)
+#   # ============================================
+#   - type: pserv
+#     name: mlflow-mongodb
+#     env: docker
+#     dockerfilePath: |
+#       FROM mongo:6.0
+#       RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+#       HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+#         CMD mongosh --eval "db.adminCommand('ping')"
+#     region: oregon
+#     plan: professional
+#     disk:
+#       name: mongodb-data
+#       mountPath: /data/db
+#       sizeGB: 10
+#     envVars:
+#       - key: MONGO_INITDB_ROOT_USERNAME
+#         value: admin
+#       - key: MONGO_INITDB_ROOT_PASSWORD
+#         generateValue: true
+#       - key: MONGO_INITDB_DATABASE
+#         value: mlflow
+#       - key: MONGO_REPLICA_SET_NAME
+#         value: rs0
+#     command: >
+#       mongod --replSet rs0 --bind_ip_all
+#     initCommands:
+#       - |
+#         # Initialize replica set
+#         sleep 10
+#         mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]})"
+#       - |
+#         # Create MLflow user
+#         sleep 5
+#         mongosh admin -u admin -p ${MONGO_INITDB_ROOT_PASSWORD} --eval "
+#           db.getSiblingDB('mlflow').createUser({
+#             user: 'mlflow',
+#             pwd: '${MONGO_PASSWORD}',
+#             roles: [
+#               { role: 'readWrite', db: 'mlflow' },
+#               { role: 'dbAdmin', db: 'mlflow' }
+#             ]
+#           })
+#         "
+
+#   # ============================================
+#   # MINIO (Private Service)
+#   # ============================================
+#   - type: pserv
+#     name: mlflow-minio
+#     env: docker
+#     dockerfilePath: |
+#       FROM minio/minio:latest
+#       RUN microdnf install curl && microdnf clean all
+#       HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+#         CMD curl -f http://localhost:9000/minio/health/live || exit 1
+#     region: oregon
+#     plan: professional
+#     disk:
+#       name: minio-data
+#       mountPath: /data
+#       sizeGB: 20
+#     envVars:
+#       - key: MINIO_ROOT_USER
+#         generateValue: true
+#       - key: MINIO_ROOT_PASSWORD
+#         generateValue: true
+#       - key: MINIO_BROWSER
+#         value: "on"
+#     command: >
+#       minio server /data --console-address ":9001"
+#     initCommands:
+#       - |
+#         # Wait for MinIO to start
+#         sleep 15
+#         # Create bucket using MinIO client (mc)
+#         /usr/bin/mc alias set local http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
+#         /usr/bin/mc mb local/mlflow-artifacts
+#         /usr/bin/mc anonymous set download local/mlflow-artifacts
+#         echo "MinIO initialized with bucket: mlflow-artifacts"
+
+# # ============================================
+# # CRON JOB for backups (optional)
+# # ============================================
+# # - type: cron
+# #   name: mlflow-backup
+# #   schedule: "0 2 * * *"  # Daily at 2 AM
+# #   env: docker
+# #   dockerfilePath: ./backup/Dockerfile
+# #   region: oregon
+# #   envVars:
+# #     - key: BACKUP_S3_BUCKET
+# #       sync: false
+# #     - key: AWS_ACCESS_KEY_ID
+# #       sync: false
+# #     - key: AWS_SECRET_ACCESS_KEY
+# #       sync: false
