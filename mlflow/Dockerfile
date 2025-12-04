@@ -66,4 +66,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Run the startup script with explicit shell
 # CMD ["/bin/bash", "./start.sh"]
-ENTRYPOINT ["/bin/sh", "/start.sh"]
+ENTRYPOINT ["/bin/sh", "./start.sh"]
