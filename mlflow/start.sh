@@ -61,4 +61,5 @@ exec mlflow server \
     --default-artifact-root "s3://${MINIO_BUCKET}/mlflow-artifacts" \
     --host 0.0.0.0 \
     --port 5000 \
-    --gunicorn-opts "--timeout 120 --workers 1 --threads 2 --keep-alive 5 --max-requests 100 --max-requests-jitter 10"
+    # --gunicorn-opts "--timeout 120 --workers 1 --threads 2 --keep-alive 5 --max-requests 100 --max-requests-jitter 10"
+    --gunicorn-opts "--workers 1 --threads 1 --timeout 180 --keep-alive 2 --max-requests 50 --preload"
