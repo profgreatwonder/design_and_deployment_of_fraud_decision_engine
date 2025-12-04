@@ -8,7 +8,7 @@ echo "Artifact store: MinIO (S3-compatible)"
 
 # Validate required environment variables
 if [ -z "$POSTGRES_URL" ]; then
-    echo "ERROR: MONGODB_URI is not set"
+    echo "ERROR: POSTGRES_URL is not set"
     exit 1
 fi
 
