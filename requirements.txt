@@ -28,3 +28,5 @@ unicodedata2==15.1.0
 wheel==0.45.1
 zipp==3.21.0
 jupyterlab==4.2.5
+torch==2.2.0
+tensorflow==2.19.1
