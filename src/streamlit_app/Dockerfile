@@ -20,7 +20,7 @@ COPY src/decisioning_engine /app/src/decisioning_engine
 COPY src/config /app/src/config
 
 COPY src/models /app/src/models
-COPY data /app/data
+COPY src/data /app/data
 
 # Copy Streamlit Code
 COPY src/streamlit_app /app/src/streamlit_app
