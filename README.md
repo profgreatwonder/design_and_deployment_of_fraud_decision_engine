@@ -463,13 +463,17 @@ One-hot encoding expanded features from 34 to 2,503 columns
 Despite excellent metrics, the near-perfect performance warrants further validation on entirely unseen real-world data to confirm the model isn't benefiting from any remaining data leakage.
 
 ---
+
 **Conclusion**
 This fraud detection analysis successfully identified critical patterns in fraudulent transactions, particularly highlighting severe vulnerabilities in specific merchant categories like water transportation and music stores, where fraud rates exceed 40%. The development of a GRU-based detection model demonstrates the power of deep learning approaches when combined with carefully engineered features such as transaction frequency patterns, rolling statistics, and merchant risk indicators.
 
 The model's near-perfect performance (99.98% accuracy, 100% recall) is encouraging, especially after addressing data leakage concerns through rigorous feature re-engineering. However, these exceptional results also necessitate cautious interpretation. The extreme class imbalance (0.18% fraud rate) required synthetic oversampling via SMOTE, which while effective for training, may not fully represent real-world complexity.
+
 ---
+
 **Recommendations**
 Before deployment, the model requires validation on completely independent, real-world transaction data to confirm its generalization capability. Additionally, focusing fraud prevention efforts on the identified high-risk merchant categories could provide immediate practical value while the model undergoes further testing. The methodology established here—combining domain-specific feature engineering with advanced neural networks—provides a solid foundation for operational fraud detection systems, pending final validation.
+
 ---
 **Future updates**
 Model Enhancements
