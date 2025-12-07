@@ -191,13 +191,21 @@ month: Month of transaction (1-12)
 #### 7. Derived Risk Features (Engineered)
 
 credit_utilization: Ratio of debt to credit limit
+
 rolling_mean_3day: 3-day rolling average of transaction amounts
+
 rolling_std_3day: 3-day rolling standard deviation (spending volatility)
+
 age_at_acct_open: Customer age when account was opened
+
 card_age: Years since account opening
+
 acct_open_year: Year the account was opened
+
 is_high_risk_mcc: Binary flag for high-risk merchant categories
+
 transactions_per_day_past: Count of prior transactions that day
+
 transactions_per_week_past: Count of prior transactions that week
 
 ---
