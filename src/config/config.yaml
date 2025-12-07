@@ -1,0 +1,104 @@
+# Fraud Detection System Configuration
+
+# Data paths
+data:
+  cards_data: "data/cards_data.csv"
+  mcc_codes: "data/mcc_codes.json"
+  transactions_data: "data/transactions_data.csv"
+  users_data: "data/users_data.csv"
+  fraud_labels: "data/train_fraud_labels.json"
+  merged_output: "data/transaction_merged.csv"
+
+# Model configuration
+model:
+  type: "GRU"
+  save_path: "src/models/fraud_detection_gru_model.h5"
+  scaler_path: "src/models/scaler.pkl"
+  encoder_path: "src/models/encoder.pkl"
+  
+  # GRU hyperparameters
+  gru_units: 64
+  dropout_rate: 0.2
+  epochs: 10
+  batch_size: 32
+  validation_split: 0.2
+  
+  # SMOTE parameters
+  smote_k_neighbors: 4
+  test_size: 0.2
+  random_state: 42
+
+# Feature configuration
+features:
+  numerical:
+    - amount
+    - credit_limit
+    - per_capita_income
+    - yearly_income
+    - total_debt
+    - credit_score
+    - num_credit_cards
+    - current_age
+    - retirement_age
+    - birth_year
+    - birth_month
+    - latitude
+    - longitude
+    - hour
+    - day_of_week
+    - month
+    - credit_utilization
+    - transactions_per_day_past
+    - transactions_per_week_past
+    - rolling_mean_3day
+    - rolling_std_3day
+    - age_at_acct_open
+    - card_age
+    - is_high_risk_mcc
+  
+  categorical:
+    - card_brand
+    - card_type
+    - use_chip
+    - has_chip
+    - gender
+    - card_on_dark_web
+    - errors
+    - description
+    - merchant_city
+    - merchant_state
+
+# High-risk MCC codes
+high_risk_mccs:
+  - 4411  # Cruise Lines
+  - 5733  # Music Stores
+  - 3005  # Miscellaneous
+  - 5045  # Computers
+  - 5732  # Electronics
+  - 5533  # Automotive
+  - 5816  # Digital Goods
+  - 3144  # Transportation
+  - 4131  # Bus Lines
+  - 5712  # Furniture
+
+# Decision thresholds
+decision:
+  reject_threshold: 0.75  # Prob >= 0.75 → REJECT
+  pend_threshold: 0.45    # 0.45 <= Prob < 0.75 → PEND
+  # Prob < 0.45 → ALLOW
+
+# Kafka configuration (Local)
+kafka:
+  bootstrap_servers: "kafka:9092"
+  topic: "transactions"
+  consumer_group_id: "fraud-detection-consumer-group"
+  
+# MLflow configuration
+mlflow:
+  tracking_uri: "http://mlflow-server:5500"
+  experiment_name: "fraud_detection"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(levelname)s - %(module)s - %(message)s"

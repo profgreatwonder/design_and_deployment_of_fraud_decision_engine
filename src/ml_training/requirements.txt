@@ -1,0 +1,9 @@
+tensorflow
+scikit-learn
+pandas
+numpy
+pyyaml
+imbalanced-learn
+mlflow
+psycopg2-binary
+boto3
