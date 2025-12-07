@@ -176,7 +176,7 @@ latitude, longitude: Geographic coordinates of customer location
 
 #### 5. Financial Profile
 
-per_capita_income: Income per capita in customer's area
+per_capita_income: Income per capita in the customer's area
 yearly_income: Customer's annual income
 total_debt: Total outstanding debt
 credit_score: Credit rating (488-850 range)
@@ -199,6 +199,7 @@ acct_open_year: Year the account was opened
 is_high_risk_mcc: Binary flag for high-risk merchant categories
 transactions_per_day_past: Count of prior transactions that day
 transactions_per_week_past: Count of prior transactions that week
+
 ---
 
 ## Project Architecture
