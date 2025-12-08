@@ -9,6 +9,7 @@ share/
 ssl/
 var/
 sbin/
+mod/
 
 # System files
 .DS_Store
