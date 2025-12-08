@@ -40,10 +40,27 @@ exit
 
 docker compose -f src/docker-compose.yaml --profile flower up -d --build
 
-Copy the External IP for VM from the GCP console.
+Copy the External IP for VM from the GCP console using curl -4 icanhazip.com
 
-Streamlit: http://<EXTERNAL_IP>:8501
+- Streamlit App: http://104.154.232.45:8501	(No login)
+- Airflow UI: http://104.154.232.45:8080	- User: airflow/password: airflow
+- MLflow UI: http://104.154.232.45:5500	(No login)
+- Flower (Celery): http://104.154.232.45:5555	(No login)
+- Kafka UI: http://104.154.232.45:8082	(No login)
+- Minio UI - http://104.154.232.45:9001/login User: minioadmin/password: minioadmin
 
-Airflow: http://<EXTERNAL_IP>:8080
 
-MLflow: http://<EXTERNAL_IP>:5500
+docker exec -it src-postgres-1 psql -U airflow -d airflow
+
+CREATE DATABASE mlflow;
+CREATE DATABASE fraud_detection;
+CREATE USER mlflow WITH PASSWORD 'mlflow';
+GRANT ALL PRIVILEGES ON DATABASE mlflow TO mlflow;
+GRANT ALL PRIVILEGES ON DATABASE fraud_detection TO airflow;
+\c mlflow
+GRANT ALL ON SCHEMA public TO mlflow;
+ALTER SCHEMA public OWNER TO mlflow;
+\q
+
+
+Check if Server is Out of Memory: docker stats --no-stream

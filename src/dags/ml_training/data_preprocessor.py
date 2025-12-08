@@ -16,51 +16,107 @@ logger = logging.getLogger(__name__)
 
 
 class DataPreprocessor:
-    def __init__(self, config_path="src/config/config.yaml"):
+    def __init__(self, config_path="/opt/airflow/config/config.yaml"):
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
         
         self.data_config = self.config['data']
         self.high_risk_mccs = self.config['high_risk_mccs']
         
+    # def load_data(self):
+    #     """Load all data files from data/ folder"""
+    #     logger.info("Loading datasets from data folder...")
+        
+    #     # Load cards data
+    #     self.cards_df = pd.read_csv(self.data_config['cards_data'])
+    #     logger.info(f"Loaded cards_data: {len(self.cards_df)} rows")
+        
+    #     # Load MCC codes
+    #     with open(self.data_config['mcc_codes'], 'r') as f:
+    #         data = json.load(f)
+    #         self.mcc_df = pd.DataFrame(list(data.items()), columns=['MCC', 'Description'])
+    #     logger.info(f"Loaded mcc_codes: {len(self.mcc_df)} rows")
+        
+    #     # Load transactions
+    #     self.transactions_df = pd.read_csv(self.data_config['transactions_data'])
+    #     logger.info(f"Loaded transactions_data: {len(self.transactions_df)} rows")
+        
+    #     # Load users
+    #     self.user_df = pd.read_csv(self.data_config['users_data'])
+    #     logger.info(f"Loaded users_data: {len(self.user_df)} rows")
+        
+    #     # Load fraud labels
+    #     with open(self.data_config['fraud_labels'], 'r') as f:
+    #         data = json.load(f)
+    #         if isinstance(data, dict) and 'target' in data:
+    #             self.labels_df = pd.DataFrame.from_dict(data['target'], orient='index', columns=['target'])
+    #         else:
+    #             self.labels_df = pd.DataFrame.from_dict(data, orient='index', columns=['target'])
+    #         self.labels_df.index.name = 'id'
+    #     logger.info(f"Loaded fraud_labels: {len(self.labels_df)} rows")
+        
+    #     # Clean column names
+    #     for df in [self.cards_df, self.mcc_df, self.transactions_df, self.user_df, self.labels_df]:
+    #         df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+        
+    #     return self
+    
+
     def load_data(self):
-        """Load all data files from data/ folder"""
+        """Load all data files from data/ folder with memory optimization"""
         logger.info("Loading datasets from data folder...")
         
-        # Load cards data
-        self.cards_df = pd.read_csv(self.data_config['cards_data'])
-        logger.info(f"Loaded cards_data: {len(self.cards_df)} rows")
-        
-        # Load MCC codes
-        with open(self.data_config['mcc_codes'], 'r') as f:
-            data = json.load(f)
-            self.mcc_df = pd.DataFrame(list(data.items()), columns=['MCC', 'Description'])
-        logger.info(f"Loaded mcc_codes: {len(self.mcc_df)} rows")
-        
-        # Load transactions
-        self.transactions_df = pd.read_csv(self.data_config['transactions_data'])
-        logger.info(f"Loaded transactions_data: {len(self.transactions_df)} rows")
-        
-        # Load users
-        self.user_df = pd.read_csv(self.data_config['users_data'])
-        logger.info(f"Loaded users_data: {len(self.user_df)} rows")
-        
-        # Load fraud labels
-        with open(self.data_config['fraud_labels'], 'r') as f:
-            data = json.load(f)
-            if isinstance(data, dict) and 'target' in data:
-                self.labels_df = pd.DataFrame.from_dict(data['target'], orient='index', columns=['target'])
-            else:
-                self.labels_df = pd.DataFrame.from_dict(data, orient='index', columns=['target'])
-            self.labels_df.index.name = 'id'
-        logger.info(f"Loaded fraud_labels: {len(self.labels_df)} rows")
-        
-        # Clean column names
-        for df in [self.cards_df, self.mcc_df, self.transactions_df, self.user_df, self.labels_df]:
-            df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
-        
-        return self
-    
+        # Define types to drastically reduce memory usage
+        dtypes = {
+            'client_id': 'int32',
+            'card_id': 'int32',
+            'amount': 'string', # We clean this later, so keep as string for now
+            'mcc': 'int16',
+            'use_chip': 'category',
+            'card_brand': 'category',
+            'card_type': 'category',
+            'is_fraud': 'int8'
+        }
+
+        try:
+            # Load smaller files normally
+            self.cards_df = pd.read_csv(self.data_config['cards_data'])
+            
+            with open(self.data_config['mcc_codes'], 'r') as f:
+                data = json.load(f)
+                self.mcc_df = pd.DataFrame(list(data.items()), columns=['MCC', 'Description'])
+            
+            # Load the HUGE file with optimization
+            logger.info("Loading transactions_data (optimized)...")
+            self.transactions_df = pd.read_csv(
+                self.data_config['transactions_data'], 
+                dtype=dtypes,
+                parse_dates=['date']  # Parse dates while reading to save a step
+            )
+            logger.info(f"Loaded transactions_data: {len(self.transactions_df)} rows")
+            
+            # Load users
+            self.user_df = pd.read_csv(self.data_config['users_data'])
+            
+            # Load labels
+            with open(self.data_config['fraud_labels'], 'r') as f:
+                data = json.load(f)
+                # Handle dictionary structure variations
+                if isinstance(data, dict) and 'target' in data:
+                    self.labels_df = pd.DataFrame.from_dict(data['target'], orient='index', columns=['target'])
+                else:
+                    self.labels_df = pd.DataFrame.from_dict(data, orient='index', columns=['target'])
+                self.labels_df.index.name = 'id'
+            
+            # Clean column names
+            for df in [self.cards_df, self.mcc_df, self.transactions_df, self.user_df, self.labels_df]:
+                df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+            
+            return self
+
+        except MemoryError:
+            logger.error("❌ OOM Error: Dataset too large for Docker RAM limits.")
+            raise
     def merge_data(self):
         """Merge all datasets"""
         logger.info("Merging datasets...")

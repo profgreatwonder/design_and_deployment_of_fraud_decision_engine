@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class FraudDecisionEngine:
-    def __init__(self, config_path="src/config/config.yaml"):
+    def __init__(self, config_path="/opt/airflow/config/config.yaml"):
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
         

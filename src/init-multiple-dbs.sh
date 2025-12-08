@@ -1,34 +1,3 @@
-# #!/bin/bash
-# set -e
-
-# psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-#     CREATE USER mlflow WITH PASSWORD 'mlflow';
-#     CREATE DATABASE mlflow;
-#     GRANT ALL PRIVILEGES ON DATABASE mlflow TO mlflow; 
-# EOSQL
-
-
-
-#!/bin/bash
-# set -e
-
-# echo "Creating MLflow user and database..."
-
-# psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-#     CREATE USER mlflow WITH PASSWORD 'mlflow';
-#     CREATE DATABASE mlflow OWNER mlflow;
-
-#     -- THIS IS THE CRUCIAL PART THAT WAS MISSING
-#     \c mlflow
-#     GRANT ALL ON SCHEMA public TO mlflow;
-#     ALTER SCHEMA public OWNER TO mlflow;   -- optional but clean-up
-#     -- End of crucial part
-# EOSQL
-
-# echo "MLflow database ready with correct permissions"
-
-
-
 #!/bin/bash
 set -e
 
@@ -36,11 +5,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     -- Create MLflow database
     CREATE DATABASE mlflow;
     GRANT ALL PRIVILEGES ON DATABASE mlflow TO $POSTGRES_USER;
-    
+
     -- Create fraud_detection database
     CREATE DATABASE fraud_detection;
     GRANT ALL PRIVILEGES ON DATABASE fraud_detection TO $POSTGRES_USER;
-    
+
     -- Create user for mlflow
     CREATE USER mlflow WITH PASSWORD 'mlflow';
     GRANT ALL PRIVILEGES ON DATABASE mlflow TO mlflow;

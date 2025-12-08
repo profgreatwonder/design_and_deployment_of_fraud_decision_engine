@@ -69,17 +69,12 @@ design_and_deployment_of_fraud_detection_system/
 - Test individual transactions
 - View model performance
 - Monitor real-time decisions
-
-## Streamlit UI (src/streamlit_app/app.py)
-Test individual transactions
-View statistics
-Decision history
-
+- View statistics
+- Decision history
 
 ## Airflow DAG (src/dags/fraud_detection_pipeline.py)
 Automated training pipeline
 Weekly retraining
-
 
 ## Docker Setup
 Local Kafka cluster

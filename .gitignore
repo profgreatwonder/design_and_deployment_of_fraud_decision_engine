@@ -10,6 +10,8 @@ ssl/
 var/
 sbin/
 mod/
+*.mod
+src/logs/*
 
 # System files
 .DS_Store

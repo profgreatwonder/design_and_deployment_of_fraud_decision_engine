@@ -643,7 +643,7 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
-      - ../init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
+      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -747,11 +747,21 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    # ✅ FIX: Explicitly map volumes correctly for the worker
     volumes:
-      - ./models:/app/src/models   # Maps src/models to container
-      - ../data:/app/data          # Maps Root/data to container
-      - ./dags:/opt/airflow/dags   # Ensure DAGs are mapped
+      # - ./models:/app/src/models   # Maps src/models to container
+      # - ../data:/app/data          # Maps Root/data to container
+      # - ./dags:/opt/airflow/dags   # Ensure DAGs are mapped
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./config:/opt/airflow/config
+      - ./plugins:/opt/airflow/plugins
+      # Existing mapping (Good for /app based paths
+      - ./models:/app/src/models
+      # Fixes the save location)
+      - ./models:/opt/airflow/src/models
+      - ./data:/opt/airflow/data
+      # # Just in case it looks for data relative to workdir
+      # - ../data:/opt/airflow/data
     networks:
       - fraud-detection
 
@@ -851,7 +861,7 @@ services:
       exit 0;
       "
     volumes:
-      - ../wait-for-it.sh:/tmp/wait-for-it.sh
+      - ./wait-for-it.sh:/tmp/wait-for-it.sh
     networks:
       - fraud-detection
 
@@ -979,7 +989,7 @@ services:
     # ✅ FIX: ALL VOLUMES
     volumes:
       - .:/app/src                # Maps current src folder to /app/src
-      - ../data:/app/data         # Maps Parent data folder to /app/data
+      - ./data:/app/data         # Maps Parent data folder to /app/data
       - ./models:/app/src/models  # Maps models to /app/src/models
     networks:
       - fraud-detection
