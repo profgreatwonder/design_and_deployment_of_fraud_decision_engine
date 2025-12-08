@@ -51,7 +51,7 @@ COPY src/streamlit_app/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # 3. Copy Shared Resources
-COPY data /app/data
+COPY src/data /app/data
 # Code expects "src/models/..." so we put it at /app/src/models
 COPY src/models /app/src/models
 COPY src/config /app/src/config

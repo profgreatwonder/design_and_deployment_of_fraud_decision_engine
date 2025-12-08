@@ -38,9 +38,19 @@ sudo usermod -aG docker $USER
 exit
 # (Click SSH again to reconnect)
 
-docker compose -f src/docker-compose.yaml --profile flower up -d --build
+# Run Commands
+- chmod +x wait-for-it.sh
+- chmod +x init-multiple-dbs.sh
+- mkdir src/models
+- docker compose build airflow-webserver --no-cache
+- docker compose --profile flower build --no-cache
+- docker compose up -d postgres redis flower zookeeper kafka kafka-ui mc minio
+- docker compose up -d airflow-init
+- sleep 30
+- docker compose --profile flower up -d airflow-webserver airflow-scheduler airflow-dag-processor airflow-triggerer airflow-cli airflow-worker mlflow-server
+# docker compose up -d producer consumer streamlit
 
-Copy the External IP for VM from the GCP console using curl -4 icanhazip.com
+Copy the External IP for VM from the GCP console using *curl -4 icanhazip.com*
 
 - Streamlit App: http://104.154.232.45:8501	(No login)
 - Airflow UI: http://104.154.232.45:8080	- User: airflow/password: airflow
