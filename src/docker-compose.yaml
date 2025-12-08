@@ -701,7 +701,10 @@ services:
       airflow-init:
         condition: service_completed_successfully
     environment:
-      AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 120    
+      AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 120
+      AIRFLOW__CORE__PARALLELISM: 2             
+      AIRFLOW__CORE__DAG_CONCURRENCY: 2          
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: 2    
     networks:
       - fraud-detection
 
@@ -740,6 +743,9 @@ services:
     environment:
       <<: *airflow-common-env
       DUMB_INIT_SETSID: "0"
+      AIRFLOW__CORE__PARALLELISM: 2             
+      AIRFLOW__CORE__DAG_CONCURRENCY: 2          
+      AIRFLOW__CELERY__WORKER_CONCURRENCY: 2
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
