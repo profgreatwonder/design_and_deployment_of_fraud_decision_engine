@@ -103,7 +103,7 @@ COPY src/producer/requirements.txt /app/requirements.txt
 # RUN pip install --no-cache-dir -r /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
-COPY data /app/data
+COPY src/data /app/data
 
 # 2. COPY SHARED LIBRARIES
 # This brings the decision engine and config into the container
