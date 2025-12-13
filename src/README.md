@@ -44,12 +44,12 @@ design_and_deployment_of_fraud_detection_system/
 
 ## Key Components
 
-### 1. Data Processing (src/ml_training/data_preprocessor.py)
+### 1. Data Processing (src/dags/ml_training/data_preprocessor.py)
 - Reads from `data/` folder (your existing dataset)
 - Preprocesses and merges all data files
 - Creates engineered features without data leakage
 
-### 2. Model Training (src/ml_training/train_model.py)
+### 2. Model Training (src/dags/ml_training/train_model.py)
 - Trains GRU model on historical data
 - SMOTE for imbalance
 - Stores model artifacts in `src/models/` for MLflow tracking

@@ -76,21 +76,52 @@
 # EXPOSE 5500
 
 
+# FROM python:3.10-slim
+
+# WORKDIR /app
+
+# # Install system dependencies
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#         curl \
+#         && rm -rf /var/lib/apt/lists/*
+
+# # Copy requirements file
+# COPY src/mlflow/requirements.txt .
+
+# # Install Python dependencies
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# EXPOSE 5500
+
+# CMD ["mlflow", "server", "--port", "5500", "--host", "0.0.0.0"]
+
+
+
 FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# 1. Install system dependencies (Cached)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         curl \
         && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file
-COPY src/mlflow/requirements.txt .
+# 2. Configure Pip for Reliability (The Fix)
+# - Increase timeout to 10 minutes (default is 15s)
+# - Retry up to 5 times
+# - Disable cache to save space and avoid corruption
+ENV PIP_TIMEOUT=600 \
+    PIP_RETRY=5 \
+    PIP_NO_CACHE_DIR=1
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# 3. Copy requirements
+COPY src/mlflow/requirements.txt requirements.txt
+
+# 4. Install dependencies with flags for better reliability
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 EXPOSE 5500
 
