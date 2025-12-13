@@ -164,18 +164,19 @@ features:
   # or should be One-Hot encoded if included in numerical list
   categorical: [] 
 
-# High-risk MCC codes (Unchanged)
+
+# High-risk MCC codes
 high_risk_mccs:
-  - 4411
-  - 5733
-  - 3005
-  - 5045
-  - 5732
-  - 5533
-  - 5816
-  - 3144
-  - 4131
-  - 5712
+  - 4411  # Cruise Lines
+  - 5733  # Music Stores
+  - 3005  # Miscellaneous
+  - 5045  # Computers
+  - 5732  # Electronics
+  - 5533  # Automotive
+  - 5816  # Digital Goods
+  - 3144  # Transportation
+  - 4131  # Bus Lines
+  - 5712  # Furniture
 
 # Decision thresholds (Used to map anomaly score to Decision)
 decision:
