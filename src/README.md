@@ -42,7 +42,7 @@ design_and_deployment_of_fraud_detection_system/
 └── README.md
 ```
 
-## Key Components
+<!-- ## Key Components
 
 ### 1. Data Processing (src/dags/ml_training/data_preprocessor.py)
 - Reads from `data/` folder (your existing dataset)
@@ -79,7 +79,47 @@ Weekly retraining
 ## Docker Setup
 Local Kafka cluster
 All services containerized
-Easy deployment
+Easy deployment -->
+
+
+Here is the updated summary reflecting the successful implementation of the **Isolation Forest** pipeline:
+
+## Key Components
+
+### 1. Data Processing (`src/dags/ml_training/data_preprocessor.py`)
+* **Optimized Loading:** Reads from the `data/` folder, utilizing memory-efficient types and row limits (1 million rows) to ensure stability within Docker resource limits.
+* **Preprocessing:** cleans raw data by handling missing values and converting currency strings to numeric types.
+* **Feature Engineering:** Generates critical numerical features for anomaly detection, including `credit_utilization`, `rolling_mean_3day`, and `transactions_per_day_past`.
+
+### 2. Model Training (`src/dags/ml_training/train_model.py`)
+* **Algorithm:** Trains an **Isolation Forest** model (unsupervised learning) to detect anomalies, replacing the previous GRU deep learning approach.
+* **Artifact Management:** Automatically saves the trained model (`fraud_detection_model.pkl`) and scaler (`scaler.pkl`) to shared storage for the Consumer.
+* **Tracking:** Registers models and parameters (e.g., contamination=0.01) to **MLflow** for version control and lineage.
+
+### 3. Real-time Transaction Processing
+* **Kafka Producer (`src/producer/main.py`):** Streams transaction data into the local Kafka cluster.
+* **Kafka Consumer (`src/consumer/main.py`):** Consumes live messages and utilizes the `FraudDecisionEngine` to evaluate transactions in real-time.
+
+### 4. Decisioning Engine (`src/decisioning_engine/decision_engine.py`)
+* **Inference:** Loads the Isolation Forest artifacts to calculate anomaly scores.
+* **Logic:** Maps anomaly scores to decisions based on config thresholds:
+    * **REJECT:** Score ≥ 0.70
+    * **PEND:** Score ≥ 0.50
+    * **ALLOW:** Score < 0.50.
+
+### 5. Streamlit UI (`src/streamlit_app/app.py`)
+* **Interactive Testing:** Provides a web interface to manually input transaction details and see immediate model predictions.
+* **Visualization:** Displays real-time statistics, fraud score distributions, and risk level breakdowns (High/Medium/Low).
+
+## Airflow DAG (`src/dags/fraud_detection_pipeline.py`)
+* **Pipeline:** Automated workflow that handles Preprocessing, Training, Validation, and Notification.
+* **Schedule:** Runs daily (`@daily`) to update the model baseline.
+
+## Docker Setup (`docker-compose.yaml`)
+* **Infrastructure:** Containerizes all services (Airflow, Kafka, MLflow, Postgres, Redis, Minio) for a unified, portable deployment.
+* **Networking:** Configured with internal service discovery (`mlflow-server`, `kafka`) to ensure seamless communication between the training pipeline and operational components.
+
+
 
 ## Files to Create
 
@@ -124,3 +164,4 @@ Easy deployment
 
 
 conda install -c conda-forge airflow tensorflow streamlit plotly
+
