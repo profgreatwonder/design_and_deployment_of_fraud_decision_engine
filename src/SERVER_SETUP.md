@@ -49,7 +49,7 @@ exit
 - docker compose --profile flower build --no-cache
 - docker compose up -d postgres redis flower zookeeper kafka kafka-ui mc minio
 - docker compose up airflow-init
-- inside the airflow-init container terminal, we will run "airflow db init"
+- inside the airflow-init container terminal, we will run "airflow db init" || docker exec -it airflow-init *for the cloud*
 - docker compose --profile flower up -d airflow-webserver airflow-scheduler
 - docker compose --profile flower up -d airflow-dag-processor airflow-triggerer
 - docker compose --profile flower up -d airflow-cli airflow-worker
