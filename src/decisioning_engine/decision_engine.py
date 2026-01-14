@@ -503,42 +503,87 @@ class FraudDecisionEngine:
             # Fallback to unscaled if scaler fails (not ideal but prevents crash)
             return df
     
+    # def predict(self, transaction_data):
+    #     """
+    #     Internal prediction logic
+    #     Returns dict with score and risk level
+    #     """
+    #     try:
+    #         # Preprocess
+    #         X = self.preprocess_transaction(transaction_data)
+            
+    #         # Predict
+    #         # Isolation Forest returns -1 for anomaly, 1 for normal
+    #         prediction = self.model.predict(X)[0] 
+            
+    #         # decision_function returns anomaly score (lower is more anomalous)
+    #         raw_anomaly_score = self.model.decision_function(X)[0]
+            
+    #         # Convert to a probability-like fraud score (0 to 1)
+    #         # We invert logic: lower raw score -> higher fraud probability
+    #         fraud_score = float(1 / (1 + np.exp(raw_anomaly_score)))
+            
+    #         is_anomaly = (prediction == -1)
+            
+    #         return {
+    #             'is_fraud': bool(is_anomaly),
+    #             'fraud_score': fraud_score,
+    #             'raw_anomaly_score': float(raw_anomaly_score)
+    #         }
+            
+    #     except Exception as e:
+    #         logger.error(f"Prediction error: {e}")
+    #         # Default safe response
+    #         return {
+    #             'is_fraud': False,
+    #             'fraud_score': 0.0,
+    #             'raw_anomaly_score': 0.0
+    #         }
+
+
     def predict(self, transaction_data):
-        """
-        Internal prediction logic
-        Returns dict with score and risk level
-        """
-        try:
-            # Preprocess
-            X = self.preprocess_transaction(transaction_data)
-            
-            # Predict
-            # Isolation Forest returns -1 for anomaly, 1 for normal
-            prediction = self.model.predict(X)[0] 
-            
-            # decision_function returns anomaly score (lower is more anomalous)
-            raw_anomaly_score = self.model.decision_function(X)[0]
-            
-            # Convert to a probability-like fraud score (0 to 1)
-            # We invert logic: lower raw score -> higher fraud probability
-            fraud_score = float(1 / (1 + np.exp(raw_anomaly_score)))
-            
-            is_anomaly = (prediction == -1)
-            
-            return {
-                'is_fraud': bool(is_anomaly),
-                'fraud_score': fraud_score,
-                'raw_anomaly_score': float(raw_anomaly_score)
-            }
-            
-        except Exception as e:
-            logger.error(f"Prediction error: {e}")
-            # Default safe response
-            return {
-                'is_fraud': False,
-                'fraud_score': 0.0,
-                'raw_anomaly_score': 0.0
-            }
+            """
+            Internal prediction logic
+            Returns dict with score and risk level
+            """
+            try:
+                # Preprocess
+                X = self.preprocess_transaction(transaction_data)
+                
+                # Predict
+                # Isolation Forest returns -1 for anomaly, 1 for normal
+                prediction = self.model.predict(X)[0] 
+                
+                # decision_function returns anomaly score (lower is more anomalous)
+                # Typical range: -0.2 (anomaly) to +0.2 (normal)
+                raw_anomaly_score = self.model.decision_function(X)[0]
+                
+                # --- THE FIX IS HERE ---
+                # We multiply by a sensitivity factor (e.g., 10 or 20)
+                # This pushes the raw score further away from 0 before converting to probability
+                sensitivity_factor = 20.0 
+                
+                # 1. Multiply raw score by sensitivity
+                # 2. Apply Sigmoid
+                fraud_score = float(1 / (1 + np.exp(raw_anomaly_score * sensitivity_factor)))
+                
+                is_anomaly = (prediction == -1)
+                
+                return {
+                    'is_fraud': bool(is_anomaly),
+                    'fraud_score': fraud_score,
+                    'raw_anomaly_score': float(raw_anomaly_score)
+                }
+                
+            except Exception as e:
+                logger.error(f"Prediction error: {e}")
+                # Default safe response
+                return {
+                    'is_fraud': False,
+                    'fraud_score': 0.0,
+                    'raw_anomaly_score': 0.0
+                }
+
 
     def process_transaction(self, transaction):
         """

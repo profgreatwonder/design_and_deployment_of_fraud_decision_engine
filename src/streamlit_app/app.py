@@ -964,123 +964,303 @@ st.sidebar.success("✅ ALLOW: Score < 0.45")
 tab1, tab2, tab3 = st.tabs(["💳 Test Transaction", "📊 Statistics", "📝 Decision History"])
 
 # Tab 1: Test Transaction
+# with tab1:
+#     st.header("Test a Transaction")
+    
+#     col1, col2 = st.columns(2)
+    
+#     with col1:
+#         st.subheader("Transaction Details")
+        
+#         amount = st.number_input("Amount ($)", min_value=0.01, max_value=100000.0, value=100.0, step=0.01)
+#         credit_limit = st.number_input("Credit Limit ($)", min_value=0.0, max_value=100000.0, value=5000.0)
+        
+#         # Calculate credit utilization
+#         credit_utilization = amount / credit_limit if credit_limit > 0 else 0
+#         st.metric("Credit Utilization", f"{credit_utilization:.2%}")
+        
+#     with col2:
+#         st.subheader("Transaction Context")
+        
+#         hour = st.slider("Hour of Day", 0, 23, 14)
+#         day_of_week = st.slider("Day of Week (0=Mon)", 0, 6, 3)
+#         month = st.slider("Month", 1, 12, 6)
+#         mcc = st.number_input("MCC Code", min_value=0, max_value=9999, value=5411)
+    
+#     st.subheader("Historical Features")
+    
+#     col3, col4 = st.columns(2)
+    
+#     with col3:
+#         rolling_mean_3day = st.number_input("Avg Amount (3-day)", min_value=0.0, value=100.0)
+#         rolling_std_3day = st.number_input("Std Dev (3-day)", min_value=0.0, value=50.0)
+#         transactions_per_day = st.number_input("Transactions Today", min_value=0, value=2)
+#         transactions_per_week = st.number_input("Transactions This Week", min_value=0, value=10)
+    
+#     with col4:
+#         age_at_acct_open = st.number_input("Age at Account Open", min_value=18, max_value=100, value=35)
+#         card_age = st.number_input("Card Age (years)", min_value=0.0, max_value=50.0, value=3.5)
+#         is_high_risk_mcc = st.checkbox("High Risk MCC", value=False)
+    
+#     # Submit button
+#     if st.button("🔍 Make Decision", type="primary"):
+#         # Generate a dummy ID for tracking
+#         txn_id = f"test_{uuid.uuid4().hex[:8]}"
+        
+#         # Create transaction dict with all numerical features
+#         transaction_data = {
+#             'transaction_id': txn_id,
+#             'amount': amount,
+#             'credit_limit': credit_limit,
+#             'credit_utilization': credit_utilization,
+#             'rolling_mean_3day': rolling_mean_3day,
+#             'rolling_std_3day': rolling_std_3day,
+#             'transactions_per_day_past': transactions_per_day,
+#             'transactions_per_week_past': transactions_per_week,
+#             'age_at_acct_open': age_at_acct_open,
+#             'card_age': card_age,
+#             'hour': hour,
+#             'day_of_week': day_of_week,
+#             'month': month,
+#             'is_high_risk_mcc': 1 if is_high_risk_mcc else 0
+#         }
+        
+#         # Process transaction
+#         with st.spinner("Processing decision..."):
+#             try:
+#                 # --- KEY CHANGE: Use process_transaction instead of predict ---
+#                 # This ensures we get the ALLOW/PEND/REJECT decision logic
+#                 result = engine.process_transaction(transaction_data)
+#             except Exception as e:
+#                 st.error(f"❌ Decision Engine Error: {str(e)}")
+#                 st.stop()
+        
+#         # Display result
+#         st.markdown("---")
+#         st.subheader("Decision Engine Result")
+        
+#         # Extract fields from result
+#         decision = result['decision']          # ALLOW / PEND / REJECT
+#         fraud_prob = result['fraud_probability']
+#         raw_score = result.get('raw_score', 0)
+#         latency = result.get('latency_ms', 0)
+        
+#         # Create visual cards
+#         col1, col2, col3 = st.columns(3)
+        
+#         with col1:
+#             st.markdown("### Decision")
+#             if decision == "REJECT":
+#                 st.error(f"# ⛔ {decision}")
+#             elif decision == "PEND":
+#                 st.warning(f"# ⏸️ {decision}")
+#             else:
+#                 st.success(f"# ✅ {decision}")
+        
+#         with col2:
+#             st.metric("Fraud Probability", f"{fraud_prob:.2%}")
+#             st.caption("Thresholds: Reject≥75%, Pend≥45%")
+        
+#         with col3:
+#             st.metric("Latency", f"{latency:.2f} ms")
+        
+#         # Additional info
+#         st.info(f"📊 Raw Anomaly Score: {raw_score:.4f} (lower = more anomalous)")
+        
+#         # Add to history
+#         st.session_state.decision_history.append({
+#             'timestamp': datetime.now(),
+#             'transaction_id': txn_id,
+#             'amount': amount,
+#             'decision': decision,
+#             'fraud_prob': fraud_prob,
+#             'latency_ms': latency
+#         })
+        
+#         # Display transaction details
+#         with st.expander("View Transaction Payload"):
+#             st.json(transaction_data)
+
+
+
+# Tab 1: Test Transaction
 with tab1:
     st.header("Test a Transaction")
     
-    col1, col2 = st.columns(2)
+    # Toggle for advanced JSON mode
+    use_json_mode = st.toggle("📝 Advanced Mode (Paste JSON)", value=False)
     
-    with col1:
-        st.subheader("Transaction Details")
+    if use_json_mode:
+        st.info("Paste a raw transaction JSON object below to test specific scenarios.")
         
-        amount = st.number_input("Amount ($)", min_value=0.01, max_value=100000.0, value=100.0, step=0.01)
-        credit_limit = st.number_input("Credit Limit ($)", min_value=0.0, max_value=100000.0, value=5000.0)
+        # Default example for a REJECT case
+        default_json = """{
+    "transaction_id": "reject_test_999",
+    "amount": 950000,
+    "credit_limit": 5000,
+    "credit_utilization": 190.0,
+    "rolling_mean_3day": 20,
+    "rolling_std_3day": 5,
+    "transactions_per_day_past": 50,
+    "transactions_per_week_past": 200,
+    "age_at_acct_open": 18,
+    "card_age": 0.1,
+    "hour": 3,
+    "day_of_week": 6,
+    "month": 12,
+    "is_high_risk_mcc": 1
+}"""
+        json_input = st.text_area("Transaction JSON", value=default_json, height=350)
         
-        # Calculate credit utilization
-        credit_utilization = amount / credit_limit if credit_limit > 0 else 0
-        st.metric("Credit Utilization", f"{credit_utilization:.2%}")
-        
-    with col2:
-        st.subheader("Transaction Context")
-        
-        hour = st.slider("Hour of Day", 0, 23, 14)
-        day_of_week = st.slider("Day of Week (0=Mon)", 0, 6, 3)
-        month = st.slider("Month", 1, 12, 6)
-        mcc = st.number_input("MCC Code", min_value=0, max_value=9999, value=5411)
-    
-    st.subheader("Historical Features")
-    
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        rolling_mean_3day = st.number_input("Avg Amount (3-day)", min_value=0.0, value=100.0)
-        rolling_std_3day = st.number_input("Std Dev (3-day)", min_value=0.0, value=50.0)
-        transactions_per_day = st.number_input("Transactions Today", min_value=0, value=2)
-        transactions_per_week = st.number_input("Transactions This Week", min_value=0, value=10)
-    
-    with col4:
-        age_at_acct_open = st.number_input("Age at Account Open", min_value=18, max_value=100, value=35)
-        card_age = st.number_input("Card Age (years)", min_value=0.0, max_value=50.0, value=3.5)
-        is_high_risk_mcc = st.checkbox("High Risk MCC", value=False)
-    
-    # Submit button
-    if st.button("🔍 Make Decision", type="primary"):
-        # Generate a dummy ID for tracking
-        txn_id = f"test_{uuid.uuid4().hex[:8]}"
-        
-        # Create transaction dict with all numerical features
-        transaction_data = {
-            'transaction_id': txn_id,
-            'amount': amount,
-            'credit_limit': credit_limit,
-            'credit_utilization': credit_utilization,
-            'rolling_mean_3day': rolling_mean_3day,
-            'rolling_std_3day': rolling_std_3day,
-            'transactions_per_day_past': transactions_per_day,
-            'transactions_per_week_past': transactions_per_week,
-            'age_at_acct_open': age_at_acct_open,
-            'card_age': card_age,
-            'hour': hour,
-            'day_of_week': day_of_week,
-            'month': month,
-            'is_high_risk_mcc': 1 if is_high_risk_mcc else 0
-        }
-        
-        # Process transaction
-        with st.spinner("Processing decision..."):
+        if st.button("🔍 Analyze JSON Payload", type="primary"):
             try:
-                # --- KEY CHANGE: Use process_transaction instead of predict ---
-                # This ensures we get the ALLOW/PEND/REJECT decision logic
-                result = engine.process_transaction(transaction_data)
+                # Parse JSON
+                transaction_data = json.loads(json_input)
+                
+                # Process transaction
+                with st.spinner("Processing decision..."):
+                    result = engine.process_transaction(transaction_data)
+                
+                # --- DISPLAY RESULTS (Reused Logic) ---
+                st.markdown("---")
+                st.subheader("Decision Engine Result")
+                
+                decision = result['decision']
+                fraud_prob = result['fraud_probability']
+                raw_score = result.get('raw_score', 0)
+                latency = result.get('latency_ms', 0)
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.markdown("### Decision")
+                    if decision == "REJECT":
+                        st.error(f"# ⛔ {decision}")
+                    elif decision == "PEND":
+                        st.warning(f"# ⏸️ {decision}")
+                    else:
+                        st.success(f"# ✅ {decision}")
+                
+                with col2:
+                    st.metric("Fraud Probability", f"{fraud_prob:.2%}")
+                with col3:
+                    st.metric("Latency", f"{latency:.2f} ms")
+                    
+                st.info(f"📊 Raw Anomaly Score: {raw_score:.4f}")
+                
+                # Add to history
+                st.session_state.decision_history.append({
+                    'timestamp': datetime.now(),
+                    'transaction_id': transaction_data.get('transaction_id', 'unknown'),
+                    'amount': transaction_data.get('amount', 0),
+                    'decision': decision,
+                    'fraud_prob': fraud_prob,
+                    'latency_ms': latency
+                })
+                
+            except json.JSONDecodeError:
+                st.error("❌ Invalid JSON format. Please check your syntax.")
             except Exception as e:
-                st.error(f"❌ Decision Engine Error: {str(e)}")
-                st.stop()
-        
-        # Display result
-        st.markdown("---")
-        st.subheader("Decision Engine Result")
-        
-        # Extract fields from result
-        decision = result['decision']          # ALLOW / PEND / REJECT
-        fraud_prob = result['fraud_probability']
-        raw_score = result.get('raw_score', 0)
-        latency = result.get('latency_ms', 0)
-        
-        # Create visual cards
-        col1, col2, col3 = st.columns(3)
+                st.error(f"❌ Error: {str(e)}")
+
+    else:
+        # --- EXISTING UI (Sliders & Inputs) ---
+        col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### Decision")
-            if decision == "REJECT":
-                st.error(f"# ⛔ {decision}")
-            elif decision == "PEND":
-                st.warning(f"# ⏸️ {decision}")
-            else:
-                st.success(f"# ✅ {decision}")
-        
+            st.subheader("Transaction Details")
+            amount = st.number_input("Amount ($)", min_value=0.01, max_value=1000000.0, value=100.0, step=0.01)
+            credit_limit = st.number_input("Credit Limit ($)", min_value=0.0, max_value=100000.0, value=5000.0)
+            credit_utilization = amount / credit_limit if credit_limit > 0 else 0
+            st.metric("Credit Utilization", f"{credit_utilization:.2%}")
+            
         with col2:
-            st.metric("Fraud Probability", f"{fraud_prob:.2%}")
-            st.caption("Thresholds: Reject≥75%, Pend≥45%")
+            st.subheader("Transaction Context")
+            hour = st.slider("Hour of Day", 0, 23, 14)
+            day_of_week = st.slider("Day of Week (0=Mon)", 0, 6, 3)
+            month = st.slider("Month", 1, 12, 6)
+            mcc = st.number_input("MCC Code", min_value=0, max_value=9999, value=5411)
+        
+        st.subheader("Historical Features")
+        col3, col4 = st.columns(2)
         
         with col3:
-            st.metric("Latency", f"{latency:.2f} ms")
+            rolling_mean_3day = st.number_input("Avg Amount (3-day)", min_value=0.0, value=100.0)
+            rolling_std_3day = st.number_input("Std Dev (3-day)", min_value=0.0, value=50.0)
+            transactions_per_day = st.number_input("Transactions Today", min_value=0, value=2)
+            transactions_per_week = st.number_input("Transactions This Week", min_value=0, value=10)
         
-        # Additional info
-        st.info(f"📊 Raw Anomaly Score: {raw_score:.4f} (lower = more anomalous)")
+        with col4:
+            age_at_acct_open = st.number_input("Age at Account Open", min_value=18, max_value=100, value=35)
+            card_age = st.number_input("Card Age (years)", min_value=0.0, max_value=50.0, value=3.5)
+            is_high_risk_mcc = st.checkbox("High Risk MCC", value=False)
         
-        # Add to history
-        st.session_state.decision_history.append({
-            'timestamp': datetime.now(),
-            'transaction_id': txn_id,
-            'amount': amount,
-            'decision': decision,
-            'fraud_prob': fraud_prob,
-            'latency_ms': latency
-        })
-        
-        # Display transaction details
-        with st.expander("View Transaction Payload"):
-            st.json(transaction_data)
+        if st.button("🔍 Make Decision", type="primary"):
+            # Create transaction dict
+            txn_id = f"test_{uuid.uuid4().hex[:8]}"
+            transaction_data = {
+                'transaction_id': txn_id,
+                'amount': amount,
+                'credit_limit': credit_limit,
+                'credit_utilization': credit_utilization,
+                'rolling_mean_3day': rolling_mean_3day,
+                'rolling_std_3day': rolling_std_3day,
+                'transactions_per_day_past': transactions_per_day,
+                'transactions_per_week_past': transactions_per_week,
+                'age_at_acct_open': age_at_acct_open,
+                'card_age': card_age,
+                'hour': hour,
+                'day_of_week': day_of_week,
+                'month': month,
+                'is_high_risk_mcc': 1 if is_high_risk_mcc else 0
+            }
+            
+            # Process transaction
+            with st.spinner("Processing decision..."):
+                try:
+                    result = engine.process_transaction(transaction_data)
+                except Exception as e:
+                    st.error(f"❌ Decision Engine Error: {str(e)}")
+                    st.stop()
+            
+            # Display result
+            st.markdown("---")
+            st.subheader("Decision Engine Result")
+            
+            decision = result['decision']
+            fraud_prob = result['fraud_probability']
+            raw_score = result.get('raw_score', 0)
+            latency = result.get('latency_ms', 0)
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown("### Decision")
+                if decision == "REJECT":
+                    st.error(f"# ⛔ {decision}")
+                elif decision == "PEND":
+                    st.warning(f"# ⏸️ {decision}")
+                else:
+                    st.success(f"# ✅ {decision}")
+            
+            with col2:
+                st.metric("Fraud Probability", f"{fraud_prob:.2%}")
+            with col3:
+                st.metric("Latency", f"{latency:.2f} ms")
+                
+            st.info(f"📊 Raw Anomaly Score: {raw_score:.4f}")
+            
+            st.session_state.decision_history.append({
+                'timestamp': datetime.now(),
+                'transaction_id': txn_id,
+                'amount': amount,
+                'decision': decision,
+                'fraud_prob': fraud_prob,
+                'latency_ms': latency
+            })
+            
+            with st.expander("View Transaction Payload"):
+                st.json(transaction_data)
 
+                
 # Tab 2: Statistics
 with tab2:
     st.header("Decision Statistics")
